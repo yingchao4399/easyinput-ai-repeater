@@ -1,0 +1,7 @@
+recordings/
+node_modules/
+.workbuddy/
+.env
+.env.*
+data/
+*.log

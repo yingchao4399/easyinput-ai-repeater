@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5f1">
+  <title>听说练习 · EasyInput</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="听说练习首页">
+        <span class="brand-mark" aria-hidden="true">EI</span>
+        <span><strong>听说练习</strong><small>EasyInput · 第五课作业</small></span>
+      </a>
+      <div class="device-status" aria-live="polite">
+        <span id="micStatus" class="status-dot offline">键盘麦克风未连接</span>
+        <span id="ledStatus" class="status-dot offline">键盘灯未连接</span>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="主导航">
+      <button class="nav-button active" type="button" data-view="practice" aria-current="page">练习</button>
+      <button class="nav-button" type="button" data-view="coach">AI 教练</button>
+      <button class="nav-button" type="button" data-view="library">材料库</button>
+      <button class="nav-button" type="button" data-view="settings">设置</button>
+    </nav>
+
+    <main>
+      <div id="practiceView" data-view-panel="practice">
+      <section class="lesson-heading">
+        <div>
+          <p class="eyebrow">英语听说 · 按键练习</p>
+        <h1>按键听示范，跟读后再按键分析</h1>
+          <p id="lessonName" class="lesson-name">打开就能练，不需要上传文件</p>
+        </div>
+        <button id="openMaterials" class="text-button" type="button">打开材料库</button>
+      </section>
+
+      <section class="practice-queue" aria-labelledby="practiceQueueTitle">
+        <div class="side-heading"><h2 id="practiceQueueTitle">接下来练什么</h2><span id="practiceQueueCount">正在载入</span></div>
+        <div id="practiceQueueItems" class="practice-queue-items"></div>
+      </section>
+
+      <section id="materialTools" class="material-tools" hidden>
+        <div class="material-heading">
+          <div><h2>自定义练习材料</h2><p>这是可选功能。默认练习已经准备好，导入一次音频后可以继续使用按键流程。</p></div>
+          <button id="closeMaterials" class="icon-button" type="button" aria-label="关闭材料选择">关闭</button>
+        </div>
+        <div class="import-row">
+          <label class="import-tile"><span class="import-icon" aria-hidden="true">♫</span><span><strong>选择音频或视频</strong><small id="mediaName">MP3、WAV、M4A、MP4</small></span><input id="mediaFile" type="file" accept="audio/*,video/*"></label>
+          <label class="import-tile"><span class="import-icon" aria-hidden="true">≡</span><span><strong>添加字幕（可选）</strong><small id="subtitleName">SRT 文件，用于逐句练习</small></span><input id="subtitleFile" type="file" accept=".srt,text/plain"></label>
+        </div>
+      </section>
+
+      <div class="practice-layout">
+        <div class="practice-main">
+          <section id="mediaPanel" class="practice-session" aria-labelledby="currentTitle">
+            <div class="sentence-meta">
+              <div><p class="section-label" id="currentTitle">AI 硬件开发入门英语</p><span id="lineIndex" class="line-count">第 1 句 / 5 句</span></div>
+              <span id="speedBadge" class="speed-badge">正常速度</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-label="练习进度" aria-valuemin="0" aria-valuemax="5" aria-valuenow="1"><span id="lessonProgress"></span></div>
+
+            <div class="sentence-copy">
+              <p id="currentText" class="english-sentence">正在载入练习句子…</p>
+              <p id="currentTranslation" class="translation"></p>
+            </div>
+
+            <section class="coach-card" aria-labelledby="coachTitle">
+              <div class="coach-card-heading">
+                <div>
+                  <p class="section-label">AI 口语教练</p>
+                  <h2 id="coachTitle">准备好了，按键开始</h2>
+                </div>
+                <span id="coachPhase" class="coach-phase">第 1 步</span>
+              </div>
+              <p id="coachInstruction" class="coach-instruction">先听示范，可播放材料原音，也可用系统语音朗读。</p>
+              <fieldset class="demo-mode" aria-label="示范方式">
+                <legend>示范方式</legend>
+                <label><input type="radio" name="demoMode" value="media" checked><span>播放材料原音</span></label>
+                <label><input type="radio" name="demoMode" value="speech"><span>AI 朗读（系统语音）</span></label>
+              </fieldset>
+              <button data-action="practice" id="practiceButton" class="coach-button" type="button">按键开始：听原句</button>
+              <p id="feedbackPanel" class="feedback-panel" role="status" hidden></p>
+            </section>
+
+            <audio id="audioMedia" preload="metadata"></audio>
+            <div id="videoStage" class="video-stage" hidden><video id="videoMedia" controls playsinline preload="metadata"></video></div>
+            <div id="mediaTimeline" class="timeline" aria-label="音频位置">
+              <span id="currentTime">00:00</span>
+              <input id="seek" type="range" min="0" max="1000" value="0" aria-label="调整播放位置">
+              <span id="duration">00:00</span>
+            </div>
+
+            <div class="listen-controls">
+              <button data-action="previous" class="secondary-button" type="button" title="S1">上一句</button>
+              <button data-action="listen" class="primary-button" type="button">重听示范</button>
+              <button data-action="next" class="secondary-button" type="button" title="S2">下一句</button>
+            </div>
+
+            <div class="practice-steps" aria-label="本句练习步骤">
+              <span class="practice-step active" id="stepListen">1 <span>听示范</span></span>
+              <span class="step-divider" aria-hidden="true"></span>
+              <span class="practice-step" id="stepRecord">2 <span>跟读录音</span></span>
+              <span class="step-divider" aria-hidden="true"></span>
+              <span class="practice-step" id="stepCompare">3 <span>对比两遍</span></span>
+            </div>
+
+            <div class="record-controls">
+              <button data-action="record" id="recordButton" class="record-button" type="button">录下我的跟读</button>
+              <button data-action="compare" id="compareButton" class="compare-button" type="button" disabled>先录音，再对比</button>
+            </div>
+            <p id="recordStatus" class="record-status">录音会按句保存在这台设备上，不需要逐条上传。</p>
+            <p id="message" role="status" class="message">按键开始，AI 会带着你完成一轮练习。</p>
+
+            <div class="sentence-actions">
+              <button data-action="loop" id="loopButton" class="quiet-button" type="button">重复本句</button>
+              <button data-action="speed" class="quiet-button" type="button" title="S6">慢速听</button>
+              <span class="action-spacer"></span>
+              <button data-action="weak" class="quiet-button" type="button" title="S8">标为待复习</button>
+              <button data-action="master" class="quiet-button" type="button">标为已掌握</button>
+            </div>
+
+            <details class="advanced-controls">
+              <summary>手动截取一小段</summary>
+              <p>先拖动进度到想重复听的开始位置，再设置开始；移到结束位置后设置结束。</p>
+              <div class="range-controls">
+                <button data-action="setA" type="button">设为开始</button>
+                <span id="abA">开始位置：整句开头</span>
+                <button data-action="setB" type="button">设为结束</button>
+                <span id="abB">结束位置：整句结尾</span>
+                <button data-action="clearRange" type="button">恢复整句</button>
+              </div>
+            </details>
+          </section>
+        </div>
+
+        <aside class="practice-side">
+          <section class="lesson-list" aria-labelledby="listTitle">
+            <div class="side-heading"><h2 id="listTitle">本节句子</h2><span id="weakCount">0 条待复习</span></div>
+            <div id="lineList" class="line-list"></div>
+          </section>
+
+          <details class="secondary-tools">
+            <summary>键盘操作与练习记录</summary>
+            <div class="keyboard-help">
+              <p>页面按钮可直接操作。EasyInput 配置为以下按键后，可用键盘快捷操作。</p>
+              <div class="keymap">
+                <span>S1 上一句</span><span>S2 下一句</span>
+                <span>S3 重复范围开始</span><span>S4 重复范围结束</span>
+                <span>S5 按键练习：听 / 录 / 停</span><span>S6 慢速</span>
+                <span>S7 原声与录音对比</span><span>S8 待复习</span>
+              </div>
+              <p id="boardHint" class="board-hint">连接状态检查中。</p>
+              <div class="benchmark-controls">
+                <button id="softwareRun" type="button">开始鼠标计时</button>
+                <button id="hardwareRun" type="button">开始键盘计时</button>
+                <button id="endRun" type="button">结束计时</button>
+              </div>
+              <p id="benchmarkStatus" class="benchmark-status">尚未开始计时。</p>
+              <div id="benchmarkResults" class="benchmark-results"></div>
+              <button id="exportButton" class="export-button" type="button">导出练习记录</button>
+            </div>
+          </details>
+
+          <details class="secondary-tools ai-planner">
+            <summary>AI 教学模型</summary>
+            <div class="keyboard-help">
+              <p>API Key 仅在查询或调用时临时提交给本机服务，再由本机服务连接对应厂商；不会写入浏览器设置。</p>
+              <label class="setting-field"><span>模型服务</span><select id="modelProvider"><option value="builtin">本地练习（无需 API）</option><option value="openai">OpenAI 兼容接口</option><option value="deepseek">DeepSeek</option><option value="qwen">通义千问</option><option value="kimi">Kimi</option><option value="ollama">Ollama（本机）</option><option value="custom">自定义接口</option></select></label>
+              <label class="setting-field"><span>接口地址</span><input id="modelEndpoint" type="url" placeholder="选择服务后自动填写"></label>
+              <label class="setting-field"><span>模型名称</span><div class="model-picker"><select id="modelName"><option value="">先获取官方模型列表</option></select><button id="refreshModels" type="button">获取官方最新模型</button></div></label>
+              <p id="modelCatalogStatus" class="benchmark-status" role="status">选择服务商并填写 API Key 后，可获取官方当前可用模型。</p>
+              <label class="setting-field"><span>API Key（临时使用）</span><input id="modelKey" type="password" autocomplete="off" placeholder="仅本次使用，不会保存"></label>
+              <label class="setting-field"><span>本机材料保存目录</span><input id="storagePath" type="text" placeholder="应用当前保存目录"></label>
+              <div class="setting-actions"><button id="chooseStoragePath" type="button">查看当前目录</button><button id="migrateStorage" type="button">迁移全部材料</button></div>
+              <p id="storageStatus" class="benchmark-status">录音和课程材料统一保存在本机。</p>
+              <div class="setting-actions"><button id="saveModelSettings" type="button">保存服务设置</button><button id="clearModelKey" type="button">清除 API Key</button></div>
+              <p id="plannerStatus" class="benchmark-status">未配置外部 AI 服务；内置课程仍可练习。</p>
+            </div>
+          </details>
+          <details class="secondary-tools ai-planner" id="speechSettings">
+            <summary>语音模型与配音 API</summary>
+            <div class="keyboard-help">
+              <p>课程逐句配音，自动进入材料库和跟读练习。建议先配置云端语音 API；本机 IndexTTS 2.5 放到最后联调。</p>
+              <label class="setting-field"><span>配音服务</span><select id="ttsProvider"><option value="windows">Windows 本机语音</option><option value="openai-speech">OpenAI / 兼容语音 API</option><option value="qwen-speech">阿里云百炼 Qwen-Audio-TTS</option><option value="yovoice">Yovoice 本地 IndexTTS 2.5</option></select></label>
+              <div id="cloudSpeechFields" hidden>
+                <label class="setting-field"><span>语音 API 地址</span><input id="cloudSpeechEndpoint" type="url" placeholder="https://api.openai.com/v1" spellcheck="false"></label>
+                <label class="setting-field"><span>语音 API Key（仅本次使用）</span><input id="cloudSpeechKey" type="password" autocomplete="off" placeholder="填写语音服务的 Key，与教学模型分别配置"></label>
+                <label class="setting-field"><span>语音模型</span><input id="cloudSpeechModel" type="text" placeholder="gpt-4o-mini-tts"></label>
+                <label class="setting-field"><span>声音</span><input id="cloudSpeechVoice" type="text" placeholder="alloy"></label>
+                <p id="cloudSpeechHint" class="benchmark-status">先填 Key，再点“测试云端语音”确认接口可用；测试只播放一句，不会写入材料库。</p>
+              </div>
+              <div id="yovoiceFields">
+                <label class="setting-field"><span>本地 API 地址</span><input id="ttsEndpoint" type="url" value="http://127.0.0.1:8080" spellcheck="false"></label>
+                <label class="setting-field"><span>本地 API 令牌（仅本次使用）</span><input id="ttsToken" type="password" autocomplete="off" placeholder="在 Yovoice → 设置 → 常规 → 本地 API 复制"></label>
+                <button id="ttsDiscover" type="button" class="export-button">连接并读取本地模型</button>
+                <label class="setting-field"><span>语音模型</span><select id="ttsModel"><option value="">连接后选择模型</option></select></label>
+                <label class="setting-field"><span>参考声音</span><select id="ttsVoice"><option value="">连接后选择声音</option></select></label>
+              </div>
+              <div class="setting-actions">
+                <button id="ttsTest" type="button">测试云端语音</button>
+                <button id="ttsSave" type="button" class="export-button">保存语音选择</button>
+              </div>
+              <p id="ttsStatus" class="benchmark-status" role="status">如需使用 IndexTTS，请先在 Yovoice 中开启“本地 API”，再连接。</p>
+            </div>
+          </details>
+          <details class="secondary-tools ai-planner" id="analysisSettings">
+            <summary>语音识别与跟读分析</summary>
+            <div class="keyboard-help">
+              <p>系统会先使用浏览器识别；连接开发板时可改用云端转写。云端只接收本句录音，用于返回“听到了哪些词”，不等同于专业音素评分。</p>
+              <label class="setting-field"><span>识别方式</span><select id="asrProvider"><option value="browser">浏览器语音识别（默认）</option><option value="openai-transcription">OpenAI / 兼容转写 API</option></select></label>
+              <div id="asrFields" hidden>
+                <label class="setting-field"><span>转写 API 地址</span><input id="asrEndpoint" type="url" placeholder="https://api.openai.com/v1" spellcheck="false"></label>
+                <label class="setting-field"><span>转写 API Key（仅本次使用）</span><input id="asrKey" type="password" autocomplete="off" placeholder="可与云端语音 Key 不同"></label>
+                <label class="setting-field"><span>转写模型</span><input id="asrModel" type="text" placeholder="whisper-1"></label>
+              </div>
+              <div class="setting-actions"><button id="asrSave" type="button" class="export-button">保存识别选择</button></div>
+              <p id="asrStatus" class="benchmark-status" role="status">默认使用浏览器识别；开发板录音接入云端转写后也能自动分析。</p>
+            </div>
+          </details>
+        </aside>
+      </div>
+      </div>
+
+      <section id="coachView" class="page-view" data-view-panel="coach" hidden>
+        <div class="page-heading"><div><p class="eyebrow">课程规划与素材发现</p><h1>AI 教练</h1><p class="lesson-name">根据你的目标和练习进度，规划课程并搜集可用语音材料。</p></div></div>
+        <section class="coach-task-form" aria-labelledby="taskFormTitle">
+          <h2 id="taskFormTitle">创建新任务</h2>
+          <ol class="workflow-steps" aria-label="教学材料生成流程">
+            <li><span>01</span><strong>搜集</strong><small>文字、图片、音频和视频</small></li>
+            <li><span>02</span><strong>整理</strong><small>来源、作者、许可</small></li>
+            <li><span>03</span><strong>规划</strong><small>目标与学习进度</small></li>
+            <li><span>04</span><strong>生成</strong><small>逐句内容与语音</small></li>
+            <li><span>05</span><strong>入库</strong><small>自动进入练习</small></li>
+          </ol>
+          <div class="task-fields">
+            <label class="setting-field"><span>学习目标</span><input id="taskGoal" type="text" value="AI 硬件开发英语口语" placeholder="例如：酒店入住对话"></label>
+            <label class="setting-field"><span>当前水平</span><select id="taskLevel"><option>初级</option><option selected>初中级</option><option>中级</option><option>高级</option></select></label>
+            <label class="setting-field"><span>希望练习的时长</span><select id="taskDuration"><option value="5">5 分钟</option><option value="10" selected>10 分钟</option><option value="15">15 分钟</option></select></label>
+          </div>
+          <div class="task-actions"><button id="runWorkflow" type="button" class="workflow-primary">搜集并生成整套教学材料</button><button id="planTask" type="button">只生成课程计划</button><button id="collectTask" type="button">只搜集素材</button></div>
+          <div class="task-fields"><label class="setting-field"><span>保存你找到的图文、音频或视频链接</span><input id="sourceLink" type="url" placeholder="粘贴 https://...，例如 B 站视频链接"></label><button id="saveSourceLink" type="button">保存来源链接</button></div>
+          <p id="taskAvailability" class="task-availability">自动搜索英文维基百科、Openverse 和 Wikimedia Commons。公开许可的视频可导入并提取音轨；其他网站链接可先保存来源，等待解析。</p>
+        </section>
+        <section class="agent-bridge" aria-labelledby="agentBridgeTitle">
+          <div><h2 id="agentBridgeTitle">让 Codex 或 WorkBuddy 帮你跨站找素材</h2><p>本机材料库已提供 MCP 工具。Codex 已配置；WorkBuddy 的项目配置文件已备好，需在 WorkBuddy 中打开本项目后确认连接状态。</p></div>
+          <button id="copyAgentBrief" type="button">复制搜集任务说明</button>
+          <p id="agentBridgeStatus" role="status">Agent 可搜索公开页面，把找到的来源保存或导入材料库。平台视频仅在可合法获取媒体文件时提取音轨。</p>
+        </section>
+        <section class="task-list-section" aria-labelledby="taskListTitle">
+          <div class="side-heading"><h2 id="taskListTitle">任务记录</h2><span id="taskCount">0 项任务</span></div>
+          <div id="coachTasks" class="coach-tasks"><p class="empty-state">还没有规划任务。</p></div>
+        </section>
+      </section>
+
+      <section id="libraryView" class="page-view" data-view-panel="library" hidden>
+        <div class="page-heading"><div><p class="eyebrow">课程与语音素材</p><h1>材料库</h1><p class="lesson-name">管理内置课程、导入的音视频和 AI 整理的练习材料。</p></div></div>
+        <div id="libraryMount"></div>
+        <section class="library-section" aria-labelledby="libraryItemsTitle">
+          <div class="side-heading"><h2 id="libraryItemsTitle">可练习的课程</h2><span id="libraryCount">1 门课程</span></div>
+          <div id="libraryItems" class="library-items"></div>
+        </section>
+      </section>
+
+      <section id="settingsView" class="page-view" data-view-panel="settings" hidden>
+        <div class="page-heading"><div><p class="eyebrow">设备与 AI 服务</p><h1>设置</h1><p class="lesson-name">按需配置语音模型、AI 教学计划和 EasyInput 键位。</p></div></div>
+        <div id="settingsMount" class="settings-sections"></div>
+      </section>
+    </main>
+    <footer>练习内容、跟读录音和复习标记保存在本机。</footer>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

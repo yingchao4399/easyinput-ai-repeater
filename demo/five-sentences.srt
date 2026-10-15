@@ -1,0 +1,19 @@
+﻿1
+00:00:00,000 --> 00:00:05,969
+Good morning. Let us practice one sentence at a time.
+
+2
+00:00:06,369 --> 00:00:11,687
+I can listen, repeat, and compare my voice.
+
+3
+00:00:12,087 --> 00:00:16,281
+Slow practice helps me hear every sound.
+
+4
+00:00:16,681 --> 00:00:21,177
+The small keyboard keeps my hands on the lesson.
+
+5
+00:00:21,577 --> 00:00:26,305
+Today I learned to build with artificial intelligence.

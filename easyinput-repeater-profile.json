@@ -1,0 +1,29 @@
+{
+  "schema": "ai_keyboard.v1",
+  "target_platform": "windows",
+  "audio_source": "wifi_udp",
+  "microphone_source": "keyboard",
+  "audio_enabled": true,
+  "audio_host": "192.0.2.10",
+  "audio_port": 17336,
+  "wifi_ssid": "在此填写 2.4GHz Wi-Fi 名称",
+  "wifi_password": "在此填写 Wi-Fi 密码",
+  "profiles": [
+    {
+      "id": "repeater",
+      "keys": {
+        "KEY1": { "press": { "hotkey": "Ctrl+Alt+Shift+1" } },
+        "KEY2": { "press": { "hotkey": "Ctrl+Alt+Shift+2" } },
+        "KEY3": { "press": { "hotkey": "Ctrl+Alt+Shift+3" } },
+        "KEY4": { "press": { "hotkey": "Ctrl+Alt+Shift+4" } },
+        "KEY5": { "press": { "hotkey": "Ctrl+Alt+Shift+5" } },
+        "KEY6": { "press": { "hotkey": "Ctrl+Alt+Shift+6" } },
+        "KEY7": { "press": { "hotkey": "Ctrl+Alt+Shift+7" } },
+        "KEY8": { "press": { "hotkey": "Ctrl+Alt+Shift+8" } }
+      },
+      "encoder": {
+        "scroll": { "enabled": true, "mode": "scroll", "axis": "vertical", "speed": 3 }
+      }
+    }
+  ]
+}
