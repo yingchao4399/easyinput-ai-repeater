@@ -73,3 +73,4 @@
 - 第五课作业指南：<https://waytoagi.feishu.cn/wiki/VrtLw31SciNOUokIPewcEX1snzh>。
 - 第五课正文：<https://waytoagi.feishu.cn/wiki/XwcVwd2rJi5YS2kF55ucvBponGc>。
 - 本报告与代码仓库：<https://github.com/yingchao4399/easyinput-ai-repeater>。
+- 实际练习页面截图：`demo/practice-page-2026-10-15.png`；截图中板卡麦克风与五灯均显示未连接，不能作为实板联调证据。
